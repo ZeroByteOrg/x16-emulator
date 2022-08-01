@@ -22,8 +22,8 @@ extern SDL_RWops *prg_file;
 
 #define UNIT_NO 8
 
-//bool log_ieee = true;
-bool log_ieee = false;
+bool log_ieee = true;
+//bool log_ieee = false;
 
 char error[80];
 int error_len = 0;
@@ -235,7 +235,24 @@ command(char *cmd)
 		case 'I': // Initialize
 			clear_error();
 			return;
+		case 'P': // Position (Seek in SEQ channel)
+			printf("  Chan=%u Offset=%u\n",
+				cmd[1],
+				*(uint32_t*)(&cmd[2])
+			);
+			if (channels[cmd[1]&0xf].f) {
+				printf("  seek 'ok'\n");
+				SDL_RWseek(channels[cmd[1]&0xf].f, *(uint32_t*)(&cmd[2]), RW_SEEK_SET);
+				channels[channel].pos = *(uint32_t*)(&cmd[2]);
+				clear_error();
+			}
+			else {
+				printf("  seek error\n");
+				set_error(0x70, 0, 0);
+			}
+			return;
 	}
+	printf ("Whaa?\n");
 	set_error(0x30, 0, 0);
 }
 
@@ -394,7 +411,7 @@ ACPTR(uint8_t *a)
 		ret = 2; // FNF
 	}
 	if (log_ieee) {
-		printf("%s-> $%02x\n", __func__, *a);
+		printf("%s-> $%02x (ret: $%02x)", __func__, *a, ret);
 	}
 	return ret;
 }

@@ -922,7 +922,7 @@ main(int argc, char **argv)
 	}
 
 	wav_recorder_set_path(wav_path);
-	
+
 	memory_init();
 
 	joystick_init();
@@ -1073,6 +1073,7 @@ handle_ieee_intercept()
 		case 0xFFA5:
 			s=ACPTR(&a);
 			status = (status & ~2) | (!a << 1);
+			printf(" status=%02x\n",status & 0xff);
 			break;
 		case 0xFFA8:
 			s=CIOUT(a);
@@ -1247,12 +1248,12 @@ emulator_loop(void *param)
 		if (!headless) {
 			new_frame |= video_step(MHZ, clocks);
 		}
-		
+
 		for (uint8_t i = 0; i < clocks; i++) {
 			i2c_step();
 		}
 		rtc_step(clocks);
-		
+
 		if (!headless) {
 			audio_render(clocks);
 		}
