@@ -1072,11 +1072,12 @@ handle_ieee_intercept()
 			break;
 		case 0xFFA5:
 			s=ACPTR(&a);
-			status = (status & ~2) | (!a << 1);
-			printf(" status=%02x\n",status & 0xff);
+			//status = (status & ~2) | (!a << 1);
+			status = (status & ~3) | (!a << 1);
 			break;
 		case 0xFFA8:
 			s=CIOUT(a);
+			status &= 0xfe; // testing - I think C should be clear....
 			break;
 		case 0xFFAB:
 			UNTLK();

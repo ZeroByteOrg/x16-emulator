@@ -411,7 +411,7 @@ ACPTR(uint8_t *a)
 		ret = 2; // FNF
 	}
 	if (log_ieee) {
-		printf("%s-> $%02x (ret: $%02x)", __func__, *a, ret);
+		printf("%s-> $%02x\n", __func__, *a);
 	}
 	return ret;
 }
