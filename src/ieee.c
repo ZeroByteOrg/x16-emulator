@@ -22,6 +22,8 @@ extern SDL_RWops *prg_file;
 
 #define UNIT_NO 8
 
+extern bool set_kernal_status(uint8_t s); // from main.c
+
 bool log_ieee = true;
 //bool log_ieee = false;
 
@@ -221,6 +223,8 @@ clear_error()
 static void
 command(char *cmd)
 {
+	unsigned char ch;
+	uint32_t offset;
 	if (!cmd[0]) {
 		return;
 	}
@@ -236,14 +240,17 @@ command(char *cmd)
 			clear_error();
 			return;
 		case 'P': // Position (Seek in SEQ channel)
-			printf("  Chan=%u Offset=%u\n",
-				cmd[1],
-				*(uint32_t*)(&cmd[2])
-			);
-			if (channels[cmd[1]&0xf].f) {
+			ch = cmd[1] & 0xf;
+			printf("  Chan=%u\n",ch);
+			if (channels[ch].f) {
 				printf("  seek 'ok'\n");
-				SDL_RWseek(channels[cmd[1]&0xf].f, *(uint32_t*)(&cmd[2]), RW_SEEK_SET);
-				channels[channel].pos = *(uint32_t*)(&cmd[2]);
+				offset = *(uint32_t*)(&cmd[2]);
+				if (offset >= channels[ch].size - 1) {
+					offset = channels[ch].size - 1;
+					//set_kernal_status(0x40);
+				}
+				SDL_RWseek(channels[ch].f, offset, RW_SEEK_SET);
+				channels[ch].pos = offset;
 				clear_error();
 			}
 			else {
@@ -252,7 +259,6 @@ command(char *cmd)
 			}
 			return;
 	}
-	printf ("Whaa?\n");
 	set_error(0x30, 0, 0);
 }
 
@@ -400,11 +406,15 @@ ACPTR(uint8_t *a)
 				ret = 0x40;
 			}
 		} else if (channels[channel].f) {
-			*a = SDL_ReadU8(channels[channel].f);
-			if (channels[channel].pos == channels[channel].size - 1) {
-				ret = 0x40;
-			} else {
+			if (channels[channel].pos < channels[channel].size) {
+				*a = SDL_ReadU8(channels[channel].f);
+				if (channels[channel].pos == channels[channel].size - 1) {
+					ret = 0x40;
+				}
 				channels[channel].pos++;
+			} else {
+				ret = 0x42;
+				*a = 0xC7;
 			}
 		}
 	} else {
