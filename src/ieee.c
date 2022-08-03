@@ -125,9 +125,15 @@ create_directory_listing(uint8_t *data)
 			*data++ = ' ';
 		}
 		*data++ = ' ';
-		*data++ = 'P';
-		*data++ = 'R';
-		*data++ = 'G';
+		if (S_ISDIR(st.st_mode)) {
+			*data++ = 'D';
+			*data++ = 'I';
+			*data++ = 'R';
+		} else {
+			*data++ = 'P';
+			*data++ = 'R';
+			*data++ = 'G';
+		}
 		*data++ = 0;
 	}
 
