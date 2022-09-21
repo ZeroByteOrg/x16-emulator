@@ -127,8 +127,6 @@ bool prg_finished_loading;
 int prg_override_start = -1;
 bool run_after_load = false;
 
-bool test = true;
-
 char *nvram_path = NULL;
 
 #ifdef TRACE
@@ -408,6 +406,8 @@ usage()
 	printf("\tDisable host fs through IEEE API interception.\n");
 	printf("\tIEEE API host fs is normally enabled unless -sdcard or\n");
 	printf("\t-serial is specified.\n");
+	printf("-noemucmdkeys\n");
+	printf("\tDisable emulator command keys.\n");
 	printf("-prg <app.prg>[,<load_addr>]\n");
 	printf("\tLoad application from the *host filesystem* into RAM,\n");
 	printf("\teven if an SD card is attached.\n");
@@ -828,6 +828,10 @@ main(int argc, char **argv)
 			argc--;
 			argv++;
 			no_ieee_intercept = true;
+		} else if (!strcmp(argv[0], "-noemucmdkeys")) {
+			argc--;
+			argv++;
+			disable_emu_cmd_keys = true;
 		} else if (!strcmp(argv[0], "-version")){
 			printf("%s", VER_INFO);
 			argc--;
